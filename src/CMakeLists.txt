@@ -1,6 +1,7 @@
 add_subdirectory(sdl)
 add_subdirectory(fltk)
 add_subdirectory(qt)
+add_subdirectory(zmq)
 
 find_package(fmt CONFIG)
 find_package(spdlog CONFIG)
