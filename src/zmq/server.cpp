@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <zmq.hpp>
+#include <zmq_addon.hpp>
 
 using namespace boost::program_options;
 using namespace std::chrono_literals;
@@ -98,12 +99,29 @@ void publish()
     }
 }
 
+void router()
+{
+    zmq::socket_t socket(context, zmq::socket_type::router);
+    socket.bind("tcp://*:5555");
+    
+    
+    while (1) {
+        zmq::message_t msg;
+        std::vector<zmq::message_t> recv_msgs;
+
+        auto res = zmq::recv_multipart(socket, std::back_inserter(recv_msgs));
+        if (res.has_value()) { std::cout << "true\n"; }
+
+        for (auto &msg : recv_msgs) { std::cout << msg.to_string_view() << '\n'; }
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     try {
         options_description desc{ "Server Options" };
         desc.add_options()("help,h", "Help screen")("reply,r", "Reply demo")("pair,p", "Pair demo")(
-          "push,u", "Push demo")("publish,b", "Publish demo");
+          "push,u", "Push demo")("publish,b", "Publish demo")("router,o", "Router demo");
 
         variables_map vm;
         store(parse_command_line(argc, argv, desc), vm);
@@ -119,6 +137,8 @@ int main(int argc, char const *argv[])
             push();
         } else if (vm.count("publish")) {
             publish();
+        } else if (vm.count("router")) {
+            router();
         } else {
             std::cout << desc << '\n';
         }

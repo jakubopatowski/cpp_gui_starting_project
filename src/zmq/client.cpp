@@ -118,9 +118,30 @@ auto subscribe_conflate = [](std::string thread_id) {
     while (1) {
         zmq::message_t msg;
         socket.recv(msg);
-        std::cout << thread_id << ": " << msg << '\n';
+        std::cout << thread_id << ": " << msg.to_string_view() << '\n';
         std::this_thread::sleep_for(500ms);
     }
+};
+
+///
+/// @brief
+///
+///
+auto dealer_send = [](std::string thread_id) {
+    zmq::socket_t socket(context, zmq::socket_type::dealer);
+
+    socket.setsockopt(ZMQ_IDENTITY, thread_id.data(), thread_id.size());
+    socket.connect("tcp://localhost:5555");
+
+    std::string data = "takie tam od klienta " + thread_id;
+    while (1) {
+        socket.send(zmq::buffer(data), zmq::send_flags::none);
+        std::this_thread::sleep_for(1000ms);
+    }
+};
+
+auto dealer_receive = [](std::string thread_id) {
+
 };
 
 ///
@@ -148,10 +169,13 @@ int main(int argc, char const *argv[])
     try {
         options_description desc{ "Client Options" };
         desc.add_options()("help,h", "Help screen.")("request,r", value<int>(), "Send Request in <x> threads.")(
-          "pair,p", value<int>(), "Pair with server in <x> threads.")(
-          "pull,u", value<int>(), "Pull from server with <x> threads.")(
+          "threadsno,t", value<int>()->default_value(1), "Number of threads")("pair,p",
+          value<int>(),
+          "Pair with server in <x> threads.")("pull,u", value<int>(), "Pull from server with <x> threads.")(
           "subscribe,s", value<int>(), "Subscribe for a topic1 with <x> threads.")(
-          "subconf,c", value<int>(), "Subscribe with conflate for all topics with <x> threads.");
+          "subconf,c", value<int>(), "Subscribe with conflate for all topics with <x> threads.")(
+          "dealersend,d", value<int>(), "Send Dealer for Router with <x> threads.")(
+          "dealerrec,e", value<int>(), "Receive Dealer for Router with <x> threads.");
 
 
         variables_map vm;
@@ -172,12 +196,16 @@ int main(int argc, char const *argv[])
         } else if (vm.count("subscribe")) {
             run_in_threads fun = subscribe;
             run(vm["subscribe"].as<int>(), fun);
-        } 
-        else if(vm.count("subconf")){
+        } else if (vm.count("subconf")) {
             run_in_threads fun = subscribe_conflate;
             run(vm["subconf"].as<int>(), fun);
-        }
-        else {
+        } else if (vm.count("dealer")) {
+            run_in_threads fun = dealer_send;
+            run(vm["dealer"].as<int>(), fun);
+        } else if (vm.count("dealerrec")) {
+            run_in_threads fun = dealer_receive;
+
+        } else {
             std::cout << desc << '\n';
         }
     } catch (const error &err) {
