@@ -109,6 +109,8 @@ void router()
         zmq::message_t msg;
         std::vector<zmq::message_t> recv_msgs;
 
+        zmq::multipart_t multipar;
+        auto res2 = multipar.recv(socket);
         auto res = zmq::recv_multipart(socket, std::back_inserter(recv_msgs));
         if (res.has_value()) { std::cout << "true\n"; }
 

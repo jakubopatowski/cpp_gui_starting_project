@@ -111,6 +111,7 @@ auto subscribe = [](std::string thread_id) {
 auto subscribe_conflate = [](std::string thread_id) {
     zmq::socket_t socket(context, zmq::socket_type::sub);
     int set_conflate = 1;
+    socket.set(zmq::sockopt::conflate, 1);
     socket.setsockopt(ZMQ_CONFLATE, &set_conflate, sizeof(set_conflate));
     socket.connect("tcp://localhost:5555");
     socket.setsockopt(ZMQ_SUBSCRIBE, "", 0);
@@ -129,6 +130,8 @@ auto subscribe_conflate = [](std::string thread_id) {
 ///
 auto dealer_send = [](std::string thread_id) {
     zmq::socket_t socket(context, zmq::socket_type::dealer);
+
+    socket.set(zmq::sockopt::iden)
 
     socket.setsockopt(ZMQ_IDENTITY, thread_id.data(), thread_id.size());
     socket.connect("tcp://localhost:5555");
