@@ -8,6 +8,8 @@ find_package(Qt5 5.12.5 REQUIRED COMPONENTS Widgets)
 
 add_executable(qt-example 
     main.cpp
+    DataSample.hpp
+    DataSample.cpp
     ui/MainWindow.hpp
     ui/mainWindow.cpp
     ui/MainWindow.ui)
@@ -19,6 +21,6 @@ target_include_directories(qt-example PUBLIC ./ui)
 target_link_libraries(
   qt-example
   PRIVATE Qt5::Widgets  
-          #project_warnings
+          project_warnings
           #project_options
           )
