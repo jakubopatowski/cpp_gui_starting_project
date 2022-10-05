@@ -8,6 +8,7 @@ find_package(Qt5 5.12.5 REQUIRED COMPONENTS Widgets)
 
 add_executable(qt-example 
     main.cpp
+    DataModel.hpp
     DataSample.hpp
     DataSample.cpp
     ui/MainWindow.hpp
